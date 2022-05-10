@@ -1,0 +1,40 @@
+import cv2
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+
+name = 'Dominick' #replace with your name
+
+cam = PiCamera()
+cam.resolution = (512, 304)
+cam.framerate = 10
+rawCapture = PiRGBArray(cam, size=(512, 304))
+    
+img_counter = 0
+
+while True:
+    #runs the camera to allow photos to be taken
+    for frame in cam.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        image = frame.array
+        cv2.imshow("Press Space to take a photo", image)
+        rawCapture.truncate(0)
+        
+        #doesnt do anything unless a key is pressed, it on does anything if esc or space is pressed
+        #esc is used to end the program
+        k = cv2.waitKey(1)
+        rawCapture.truncate(0)
+        if k%256 == 27: # ESC pressed
+            break
+        elif k%256 == 32:
+            # press space to take images of the user
+            #these images are wrote to their folder in the dataset folder
+            img_name = "dataset/"+ name +"/image_{}.jpg".format(img_counter)
+            #cv2 allows the images to be taken and saved
+            cv2.imwrite(img_name, image)
+            print("{} written!".format(img_name))
+            img_counter += 1
+            
+    if k%256 == 27:
+        print("Escape hit, closing...")
+        break
+
+cv2.destroyAllWindows()
